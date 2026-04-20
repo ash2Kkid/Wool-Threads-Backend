@@ -7,6 +7,7 @@ python-jose[cryptography]
 opencv-python
 numpy==1.26.4
 pillow
-torch==2.2.2
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.2+cpu
 scikit-learn
 python-multipart
