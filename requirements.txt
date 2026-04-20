@@ -5,9 +5,7 @@ pydantic
 python-dotenv
 python-jose[cryptography]
 opencv-python
-numpy
+numpy==1.26.4
 pillow
-torch 
-tensorflow
+torch==2.2.2
 scikit-learn
-
