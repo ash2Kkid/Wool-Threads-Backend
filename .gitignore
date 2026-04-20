@@ -24,3 +24,9 @@ firebase_key.json
 
 # OS
 .DS_Store
+
+# ML files
+*.h5
+*.keras
+*.pt
+*.pth
