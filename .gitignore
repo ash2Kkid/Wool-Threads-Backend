@@ -1,0 +1,26 @@
+.env
+firebase_key.json
+__pycache__/
+*.pyc
+*.venv
+venv
+
+# Python
+__pycache__/
+*.pyc
+
+# Temp files
+tmp/
+
+# ML artifacts
+*.zip
+*.h5
+*.pt
+*.pth
+*.pkl
+
+# Secrets
+firebase_key.json
+
+# OS
+.DS_Store
