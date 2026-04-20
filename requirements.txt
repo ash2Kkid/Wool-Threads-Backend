@@ -11,3 +11,4 @@ pillow
 torch==2.2.2+cpu
 scikit-learn
 python-multipart
+tensorflow==2.15.0
