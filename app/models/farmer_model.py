@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class Farmer(BaseModel):
     id: str
     name: str
+    email: str | None = None
     farm_name: str
     location: str
 

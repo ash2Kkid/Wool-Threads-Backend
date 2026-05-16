@@ -4,8 +4,8 @@ from pydantic import BaseModel
 class Product(BaseModel):
     id: str
 
-    supplier_id: str            # farmer or manufacturer
-    supplier_type: str          # "farmer" / "manufacturer"
+    supplier_id: str | None = None   # farmer or manufacturer
+    supplier_type: str | None = None # "farmer" / "manufacturer"
 
     batch_id: str | None = None # Only for farmer raw products
 
@@ -14,6 +14,7 @@ class Product(BaseModel):
 
     description: str
     price: float
-    stock: int
+    stock: int = 0
 
-    imageUrl: str
+    image: str | None = None
+    imageUrl: str | None = None

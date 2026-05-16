@@ -5,6 +5,11 @@ def add_product(product_data: dict):
     db.collection("products").document(product_data["id"]).set(product_data)
 
 
+def get_product(product_id: str):
+    doc = db.collection("products").document(product_id).get()
+    return doc.to_dict() if doc.exists else None
+
+
 def get_all_products():
     docs = db.collection("products").stream()
     return [doc.to_dict() for doc in docs]

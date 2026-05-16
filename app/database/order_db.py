@@ -1,10 +1,6 @@
 from app.core.firebase import db
 import uuid
-
-
-import uuid
 from datetime import datetime
-from app.core.firebase import db
 
 
 def create_order(order_data: dict):
@@ -42,7 +38,7 @@ def update_order_status(order_id: str, status: str):
 def get_orders_by_farmer(farmer_id: str):
     docs = (
         db.collection("orders")
-        .where("farmer_id", "==", farmer_id)
+        .where("farmer_ids", "array_contains", farmer_id)
         .stream()
     )
     return [doc.to_dict() for doc in docs]

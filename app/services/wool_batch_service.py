@@ -1,16 +1,30 @@
 import uuid
-from app.core.firebase import db
 from fastapi import HTTPException
+from firebase_admin import firestore
+from app.core.firebase import db
+from app.database.farmer_db import get_farmer
+from app.database.wool_batch_db import get_batches_by_farmer
 from app.database.wool_batch_db import create_batch
 from app.database.wool_batch_db import assign_batch, get_batch
-from app.database.manufacturer_db import get_all_manufacturers
 from app.database.revenue_db import record_farmer_payment
 from datetime import datetime
 
 from app.database.batch_tracking_db import create_batch_tracking
-from app.database.warehouse_db import get_all_warehouses
 from app.models.wool_batch_model import WoolBatch
 
+
+def _find_collection_document(collection_name: str, entity_id: str):
+    direct_doc = db.collection(collection_name).document(entity_id).get()
+    if direct_doc.exists:
+        return direct_doc.to_dict()
+
+    docs = (
+        db.collection(collection_name)
+        .where("id", "==", entity_id)
+        .limit(1)
+        .stream()
+    )
+    return next((doc.to_dict() for doc in docs), None)
 
 
 def send_batch_to_manufacturer(batch_id: str, manufacturer_id: str):
@@ -24,8 +38,7 @@ def send_batch_to_manufacturer(batch_id: str, manufacturer_id: str):
     qty = batch["quantity_kg"]
 
     # ✅ Find Manufacturer
-    manufacturers = get_all_manufacturers()
-    manu = next((m for m in manufacturers if m["id"] == manufacturer_id), None)
+    manu = _find_collection_document("manufacturers", manufacturer_id)
 
     if not manu:
         raise HTTPException(status_code=404, detail="Manufacturer not found")
@@ -75,13 +88,18 @@ def send_batch_to_manufacturer(batch_id: str, manufacturer_id: str):
         "expected_market_price": qty * 400
     })
 
+    if get_farmer(batch["farmer_id"]):
+        db.collection("farmers").document(batch["farmer_id"]).update({
+            "total_earnings": firestore.Increment(qty * price)
+        })
+
     create_batch_tracking({
-    "batch_id": batch_id,
-    "farmer_id": batch["farmer_id"],
-    "current_location": "Farmer Collection Center",
-    "status": "Dispatched to Buyer",
-    "eta": "3-5 days"
-})
+        "batch_id": batch_id,
+        "farmer_id": batch["farmer_id"],
+        "current_location": "Farmer Collection Center",
+        "status": "Dispatched to Buyer",
+        "eta": "3-5 days"
+    })
 
     return {
         "message": "✅ Batch sent successfully",
@@ -99,8 +117,7 @@ def send_batch_to_warehouse(batch_id: str, warehouse_id: str):
         raise HTTPException(status_code=404, detail="Batch not found")
 
     # ✅ Find warehouse
-    warehouses = get_all_warehouses()
-    wh = next((w for w in warehouses if w["id"] == warehouse_id), None)
+    wh = _find_collection_document("warehouses", warehouse_id)
 
     if not wh:
         raise HTTPException(status_code=404, detail="Warehouse not found")
@@ -137,19 +154,23 @@ def send_batch_to_warehouse(batch_id: str, warehouse_id: str):
     }
 
 
-
-
 def register_batch(batch: WoolBatch):
     batch_data = batch.dict()
+
+    if not get_farmer(batch_data["farmer_id"]):
+        raise HTTPException(status_code=404, detail="Farmer not found")
 
     # ✅ Auto ID
     batch_data["id"] = "BATCH-" + uuid.uuid4().hex[:5].upper()
 
     create_batch(batch_data)
 
+    db.collection("farmers").document(batch_data["farmer_id"]).update({
+        "total_batches": firestore.Increment(1)
+    })
+
     return {"message": "Batch created", "batch": batch_data}
 
-from app.database.wool_batch_db import get_batches_by_farmer
 
 def fetch_farmer_batches(farmer_id: str):
     return get_batches_by_farmer(farmer_id)
