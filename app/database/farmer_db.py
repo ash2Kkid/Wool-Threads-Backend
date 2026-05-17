@@ -5,6 +5,28 @@ def create_farmer(farmer_data: dict):
     db.collection("farmers").document(farmer_data["id"]).set(farmer_data)
 
 
+def get_farmer_ref(farmer_id: str):
+    farmer_ref = db.collection("farmers").document(farmer_id)
+    if farmer_ref.get().exists:
+        return farmer_ref
+
+    user_ref = db.collection("users").document(farmer_id)
+    user_doc = user_ref.get()
+    if user_doc.exists and user_doc.to_dict().get("role") == "farmer":
+        return user_ref
+
+    return None
+
+
+def update_farmer_stats(farmer_id: str, updates: dict) -> bool:
+    farmer_ref = get_farmer_ref(farmer_id)
+    if farmer_ref is None:
+        return False
+
+    farmer_ref.update(updates)
+    return True
+
+
 def get_farmer(farmer_id: str):
     farmer_doc = db.collection("farmers").document(farmer_id).get()
     if farmer_doc.exists:

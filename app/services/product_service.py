@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from firebase_admin import firestore
 from app.core.firebase import db
-from app.database.farmer_db import get_farmer
+from app.database.farmer_db import get_farmer, update_farmer_stats
 from app.database.product_db import add_product, get_all_products
 from app.database.wool_batch_db import get_batch
 
@@ -55,7 +55,7 @@ def create_product(product):
     add_product(product_data)
 
     if supplier_type == "farmer":
-        db.collection("farmers").document(supplier_id).update({
+        update_farmer_stats(supplier_id, {
             "total_products": firestore.Increment(1)
         })
 

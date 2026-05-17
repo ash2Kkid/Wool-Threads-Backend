@@ -2,7 +2,7 @@ import uuid
 from fastapi import HTTPException
 from firebase_admin import firestore
 from app.core.firebase import db
-from app.database.farmer_db import get_farmer
+from app.database.farmer_db import get_farmer, update_farmer_stats
 from app.database.wool_batch_db import get_batches_by_farmer
 from app.database.wool_batch_db import create_batch
 from app.database.wool_batch_db import assign_batch, get_batch
@@ -88,10 +88,9 @@ def send_batch_to_manufacturer(batch_id: str, manufacturer_id: str):
         "expected_market_price": qty * 400
     })
 
-    if get_farmer(batch["farmer_id"]):
-        db.collection("farmers").document(batch["farmer_id"]).update({
-            "total_earnings": firestore.Increment(qty * price)
-        })
+    update_farmer_stats(batch["farmer_id"], {
+        "total_earnings": firestore.Increment(qty * price)
+    })
 
     create_batch_tracking({
         "batch_id": batch_id,
@@ -165,7 +164,7 @@ def register_batch(batch: WoolBatch):
 
     create_batch(batch_data)
 
-    db.collection("farmers").document(batch_data["farmer_id"]).update({
+    update_farmer_stats(batch_data["farmer_id"], {
         "total_batches": firestore.Increment(1)
     })
 
