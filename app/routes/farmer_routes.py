@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.farmer_model import Farmer
 from app.services.farmer_service import (
     register_farmer,
@@ -16,7 +16,10 @@ def create_farmer(farmer: Farmer):
 
 @router.get("/{farmer_id}")
 def get_profile(farmer_id: str):
-    return fetch_farmer_profile(farmer_id)
+    profile = fetch_farmer_profile(farmer_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Farmer not found")
+    return profile
 
 
 @router.get("/{farmer_id}/batches")
