@@ -1,7 +1,6 @@
 from datetime import datetime
 from firebase_admin import firestore
-from app.core.firebase import db
-from app.database.customer_db import get_customer
+from app.database.customer_db import get_customer, update_customer_stats
 from app.database.product_db import get_product
 from app.database.order_db import create_order
 from app.database.tracking_db import create_tracking
@@ -57,7 +56,7 @@ def place_order(order):
 
     customer = get_customer(saved_order["customer_id"])
     if customer:
-        db.collection("customers").document(saved_order["customer_id"]).update({
+        update_customer_stats(saved_order["customer_id"], {
             "total_orders": firestore.Increment(1)
         })
 

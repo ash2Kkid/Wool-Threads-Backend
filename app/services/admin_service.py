@@ -1,4 +1,8 @@
 from app.core.firebase import db
+from app.database.customer_db import get_all_customers as fetch_all_customers
+from app.database.customer_db import get_customer
+from app.database.farmer_db import get_all_farmers as fetch_all_farmers
+from app.database.farmer_db import get_farmer
 
 
 # ----------------------------
@@ -6,13 +10,11 @@ from app.core.firebase import db
 # ----------------------------
 
 def get_all_farmers():
-    docs = db.collection("farmers").stream()
-    return [doc.to_dict() for doc in docs]
+    return fetch_all_farmers()
 
 
 def get_farmer_by_id(farmer_id: str):
-    doc = db.collection("farmers").document(farmer_id).get()
-    return doc.to_dict() if doc.exists else None
+    return get_farmer(farmer_id)
 
 
 # ----------------------------
@@ -20,13 +22,11 @@ def get_farmer_by_id(farmer_id: str):
 # ----------------------------
 
 def get_all_customers():
-    docs = db.collection("customers").stream()
-    return [doc.to_dict() for doc in docs]
+    return fetch_all_customers()
 
 
 def get_customer_by_id(customer_id: str):
-    doc = db.collection("customers").document(customer_id).get()
-    return doc.to_dict() if doc.exists else None
+    return get_customer(customer_id)
 
 
 # ----------------------------

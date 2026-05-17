@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.order_model import Order
 from app.database.order_db import get_order, get_orders_by_customer
 from app.database.order_db import get_orders_by_farmer
@@ -24,4 +24,7 @@ def farmer_orders(farmer_id: str):
 
 @router.get("/{order_id}")
 def order_by_id(order_id: str):
-    return get_order(order_id)
+    order = get_order(order_id)
+    if order is None:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order

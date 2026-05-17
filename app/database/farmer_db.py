@@ -55,5 +55,14 @@ def get_farmer(farmer_id: str):
 
 
 def get_all_farmers():
-    docs = db.collection("farmers").stream()
-    return [doc.to_dict() for doc in docs]
+    farmers = {doc.id: doc.to_dict() for doc in db.collection("farmers").stream()}
+
+    user_docs = (
+        db.collection("users")
+        .where("role", "==", "farmer")
+        .stream()
+    )
+    for doc in user_docs:
+        farmers.setdefault(doc.id, get_farmer(doc.id))
+
+    return list(farmers.values())

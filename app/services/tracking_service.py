@@ -1,6 +1,3 @@
-from app.database.tracking_db import get_tracking, update_tracking
-
-
 from fastapi import HTTPException
 from app.database.tracking_db import get_tracking, update_tracking
 
@@ -17,5 +14,11 @@ def fetch_tracking(order_id: str):
 
 
 def update_shipment(order_id: str, location: str, status: str):
+    if get_tracking(order_id) is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No tracking found for order {order_id}"
+        )
+
     update_tracking(order_id, location, status)
     return {"message": "Tracking updated"}
